@@ -1,29 +1,43 @@
 #!/usr/bin/python3
-
-'''CSV export'''
+"""
+Export employee TODO list to CSV file using a REST API.
+"""
 
 import csv
-import requests
 import sys
 
-if __name__ == '__main__':
-    user_id = sys.argv[1]
-    user_url = "https://jsonplaceholder.typicode.com/users/{}" \
-        .format(user_id)
-    todos_url = "https://jsonplaceholder.typicode.com/users/{}/todos/" \
-        .format(user_id)
+import requests
 
-    user_info = requests.request('GET', user_url).json()
-    todos_info = requests.request('GET', todos_url).json()
 
-    employee_name = user_info["name"]
-    task_completed = list(filter(lambda obj:
-                                 (obj["completed"] is True), todos_info))
-    number_of_done_tasks = len(task_completed)
-    total_number_of_tasks = len(todos_info)
+if __name__ == "__main__":
+    # Get employee ID from command-line
+    user_id = int(sys.argv[1])
 
-    with open('{}.csv'.format(user_id), 'w') as csvfile:
-        csvwriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        [csvwriter.writerow([user_id, user_info["username"],
-                             task["completed"], task["title"]])
-         for task in todos_info]
+    # URLs for user info and todos
+    user_url = "https://jsonplaceholder.typicode.com/users/{}".format(
+        user_id
+    )
+    todos_url = "https://jsonplaceholder.typicode.com/users/{}/todos/".format(
+        user_id
+    )
+
+    # Fetch data from API
+    user_info = requests.get(user_url).json()
+    todos_info = requests.get(todos_url).json()
+
+    # Get username safely
+    username = user_info.get("username")
+
+    # Create CSV file named USER_ID.csv
+    filename = "{}.csv".format(user_id)
+    with open(filename, mode="w", newline="") as csv_file:
+        writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+
+        for task in todos_info:
+            # Write row: USER_ID, USERNAME, TASK_COMPLETED_STATUS, TASK_TITLE
+            writer.writerow([
+                user_id,
+                username,
+                task.get("completed"),
+                task.get("title")
+            ])
