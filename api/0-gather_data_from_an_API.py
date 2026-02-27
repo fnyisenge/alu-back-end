@@ -4,8 +4,8 @@ Gather TODO list progress for a given employee using a REST API.
 """
 
 import sys
-import requests
 
+import requests
 
 if __name__ == '__main__':
     user_id = int(sys.argv[1])
