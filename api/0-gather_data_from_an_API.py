@@ -1,29 +1,38 @@
 #!/usr/bin/python3
-"""Module"""
+"""
+Gather TODO list progress for a given employee using a REST API.
+"""
 
-import requests
 import sys
-
-
-"""Module"""
+import requests
 
 if __name__ == '__main__':
-    user_id = sys.argv[1]
-    user_url = "https://jsonplaceholder.typicode.com/users/{}" \
-        .format(user_id)
-    todos_url = "https://jsonplaceholder.typicode.com/users/{}/todos/" \
-        .format(user_id)
+    # Get employee ID as integer
+    user_id = int(sys.argv[1])
 
-    user_info = requests.request('GET', user_url).json()
-    todos_info = requests.request('GET', todos_url).json()
+    # URLs for user info and todos
+    user_url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
+    todos_url = "https://jsonplaceholder.typicode.com/users/{}/todos/".format(user_id)
 
-    employee_name = user_info["name"]
-    task_completed = list(filter(lambda obj:
-                                 (obj["completed"] is True), todos_info))
+    # Fetch data from API
+    user_info = requests.get(user_url).json()
+    todos_info = requests.get(todos_url).json()
+
+    # Safely get employee name
+    employee_name = user_info.get("name")
+
+    # Filter completed tasks using .get()
+    task_completed = list(filter(lambda obj: obj.get("completed"), todos_info))
+
+    # Count tasks
     number_of_done_tasks = len(task_completed)
     total_number_of_tasks = len(todos_info)
 
-    print("Employee {} is done with tasks({}/{}):".
-          format(employee_name, number_of_done_tasks, total_number_of_tasks))
+    # Print summary exactly as ALU expects
+    print("Employee {} is done with tasks({}/{}):".format(
+        employee_name, number_of_done_tasks, total_number_of_tasks
+    ))
 
-    [print("\t " + task["title"]) for task in task_completed]
+    # Print all completed tasks with 1 tab + 1 space
+    for task in task_completed:
+        print("\t " + task.get("title"))
